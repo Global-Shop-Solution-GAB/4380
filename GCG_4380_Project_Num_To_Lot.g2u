@@ -1,0 +1,38 @@
+Program.Sub.Preflight.Start
+
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+'BN Mar 17, 2017
+'Shop Floor Control > Transactions > WIP To Finished Goods: If Lot/Bin button is clicked, the following screen will populate the Lot number with the Project number if the Work Order has a Project associated with it
+
+F.Intrinsic.Control.SetErrorHandler("Main_Err")
+F.Intrinsic.Control.ClearErrors
+
+v.Local..BulkDeclareString(sError, sSQL)
+
+f.Intrinsic.Control.If(v.Caller.Hook,=,16500)
+	
+	F.ODBC.Connection!con.OpenConnection(V.Ambient.PDSN, V.Ambient.PUser, V.Ambient.PPass)
+	f.Intrinsic.String.Build("Select Project from Job_Header where Job = '{0}' and Suffix = '{1}'",v.Passed.000005,v.Passed.000006,v.Local.sSQL)
+	F.ODBC.Connection!con.OpenLocalRecordsetRO("rst",V.Local.sSQL)
+	F.Intrinsic.Control.If(V.ODBC.con!rst.EOF,<>,True)
+		v.Passed.000010.Set(v.ODBC.con!rst.FieldValTrim!Project)
+	f.Intrinsic.Control.EndIf
+	f.ODBC.Connection!con.Close
+	
+f.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("Main_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_4380_Project_Num_To_Lot.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+Function.Intrinsic.Control.EndIf
+
+Program.Sub.Main.End
+
+Program.Sub.Comments.Start
+${$0$}$$}$$}$3/17/2017 10:39:10 AM$}$False
+Program.Sub.Comments.End
